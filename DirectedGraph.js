@@ -104,29 +104,25 @@ class Graph{
             let v = Q.shift();
             visitedNodes[v] = 'visited';
             p.push(v);
-            if(v === 't') {console.log("PATH FOUND"); console.log(p)}
+            if(v === 't') {
+                console.log("PATH FOUND"); 
+                console.log(p)
+            }
 
-            //Find all neighbours w of v in G`
-            //Might have to change the BFS to add vertices by weight
-            //Also, wouldn't DFS make more sense?
             let outgoingEdges = this.Edges.filter(function(edge){
                 if(edge.vertexOne.id === v) return edge.vertexOne.id;
-            })
-            let neighbourVertices = [];
-            for(const outgoingEdge of Object.entries(outgoingEdges)){
-                neighbourVertices.push(outgoingEdge[1].vertexTwo.id);
-            }
-            console.log(`Neighbours of ${v}: ` + neighbourVertices);
-
-            //If neighbour w is not visited, add to Q
-            for(const w of Object.entries(neighbourVertices)){
-                if(visitedNodes[w[1]] === 'unvisited'){
-                    if(!Q.includes(w[1])) Q.push(w[1]);
+            })      
+           
+            //Sort the outgoing edges in increasing order
+            //Add into queue in increasing order
+            outgoingEdges.sort((a, b) => a.flow > b.flow ? 1 : -1);
+            for(let outEdge of Object.entries(outgoingEdges)){
+                //console.log(outEdge[1].vertexTwo.id);
+                if(visitedNodes[outEdge[1].vertexTwo.id] === 'unvisited'){
+                    if(!Q.includes(outEdge[1].vertexTwo.id)) Q.push(outEdge[1].vertexTwo.id);
                 }
             }
         }
-
-        
         return pathEdges;
     }
 
@@ -159,7 +155,7 @@ class Graph{
             residualGraph.addEdge(edge[1].vertexOne.id, edge[1].vertexTwo.id, newFlow);
         }
 
-        //Add the Back Edges | O(E^2)
+        //Add the Back Edges | O(E^2) | IGNORE THIS 
         for(const edge of Object.entries(this.Edges)){
             let residualEdgeFlow = residualGraph.Edges.filter(function(resEdge){
                 if(resEdge.vertexOne.id === edge[1].vertexTwo.id && resEdge.vertexTwo.id === edge[1].vertexOne.id ) return resEdge;
@@ -172,9 +168,9 @@ class Graph{
         //Augmenting Flows PAGE 16 in Lecture 09
 
         //First, set flow of every edge in E to zero. | O(E)
-        for(const edge of Object.entries(this.Edges)){
-            edge[1].flow = 0;
-        }
+        // for(const edge of Object.entries(this.Edges)){
+        //     edge[1].flow = 0;
+        // }
 
         //While there is a path p from s to t in residualGraph:
         //capacity of p = min of all edge capacities in p
@@ -182,18 +178,11 @@ class Graph{
         //  if(u,v) is in this.Edges
         //      (u,v).flow = (u,v).flow + capacity of p
         //  else (v,u).flow = (v,u).flow - capacity of p
-
-        //Always choose p as the shortest path form s to t in the residual network
-        //Using BFS
-        //This is the Edmonds-Karp algorithm
-        //Find path in residual network via BFS, increase all v in p 
-        //Until a flow on some v in p on G` is zero, meaning capacity is reached
         
-        /*
-        while(residualGraph.BFSTree(this.sourceID)){
-            let path_flow = Number.MAX_VALUE;
-        }
-        */
+        
+        // while(residualGraph.BFSTree(this.sourceID)){
+        //     residualGraph.FindPath('s');
+        // }
 
         return "Max Flow";
     }
@@ -204,5 +193,3 @@ var G = new Graph();
 
 G.populate();
 console.log(G.maximumFlow());
-
-console.log(G.FindPath('s'));
